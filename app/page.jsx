@@ -102,26 +102,25 @@ export default function LeaderboardPage() {
           </div>
         ) : (
           <div className="space-y-2">
-            {/* Table Header */}
-            <div className="grid grid-cols-12 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-neutral-500 border-b border-[#1c1c1c]">
+            {/* Table Header (hidden on tiny screens, clear on sm+) */}
+            <div className="hidden sm:grid sm:grid-cols-12 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-neutral-500 border-b border-[#1c1c1c]">
               <div className="col-span-2 md:col-span-1">Rank</div>
               <div className="col-span-3 md:col-span-2">Team ID</div>
               <div className="col-span-7 md:col-span-9">Team Name</div>
             </div>
 
-            {/* Rows */}
-            <div className="space-y-1.5">
+            {/* Rows: Responsive Flex on Mobile, Grid on Tablet/Desktop */}
+            <div className="space-y-2 sm:space-y-1.5">
               {leaderboard.map((team, idx) => {
                 const rankNum = team.rank;
                 const isTop1 = rankNum === 1;
                 const isTop2 = rankNum === 2;
                 const isTop3 = rankNum === 3;
-                const isPodium = isTop1 || isTop2 || isTop3;
 
                 return (
                   <div
                     key={team.teamId}
-                    className={`rank-row grid grid-cols-12 items-center px-4 py-3 rounded-xl border text-sm transition-all ${
+                    className={`rank-row flex items-center justify-between sm:grid sm:grid-cols-12 gap-3 px-3.5 sm:px-4 py-3 rounded-xl border transition-all ${
                       isTop1
                         ? 'bg-[#ff7a1a]/10 border-[#ff7a1a]/40 text-white shadow-sm shadow-[#ff7a1a]/10'
                         : isTop2
@@ -131,32 +130,42 @@ export default function LeaderboardPage() {
                         : 'bg-[#121212] border-[#222222] text-neutral-200'
                     }`}
                   >
-                    <div className="col-span-2 md:col-span-1 font-mono font-bold">
+                    {/* Rank Badge */}
+                    <div className="flex-shrink-0 sm:col-span-2 md:col-span-1 font-mono font-bold">
                       {rankNum !== null ? (
                         <span
-                          className={`inline-flex items-center justify-center w-7 h-7 rounded-lg text-xs font-black ${
+                          className={`inline-flex items-center justify-center w-8 h-8 sm:w-7 sm:h-7 rounded-lg text-xs font-black ${
                             isTop1
-                              ? 'bg-[#ff7a1a] text-black'
+                              ? 'bg-[#ff7a1a] text-black shadow-sm shadow-[#ff7a1a]/40'
                               : isTop2
                               ? 'bg-neutral-300 text-black'
                               : isTop3
                               ? 'bg-amber-700 text-white'
-                              : 'text-neutral-400 bg-neutral-900'
+                              : 'text-neutral-400 bg-neutral-900 border border-neutral-800'
                           }`}
                         >
-                          {rankNum}
+                          #{rankNum}
                         </span>
                       ) : (
-                        <span className="text-neutral-600">—</span>
+                        <span className="text-neutral-600 text-sm">—</span>
                       )}
                     </div>
 
-                    <div className="col-span-3 md:col-span-2 font-mono text-xs font-semibold text-[#ff7a1a]">
+                    {/* Team ID (Visible on sm+ in its own column) */}
+                    <div className="hidden sm:block sm:col-span-3 md:col-span-2 font-mono text-xs font-bold text-[#ff7a1a]">
                       {team.teamId}
                     </div>
 
-                    <div className="col-span-7 md:col-span-9 font-bold tracking-tight text-white truncate text-base">
-                      {team.teamName}
+                    {/* Team Info (Mobile: shows ID badge next to or under name) */}
+                    <div className="flex-1 sm:col-span-7 md:col-span-9 min-w-0">
+                      <div className="flex flex-col sm:block">
+                        <span className="font-bold tracking-tight text-white text-sm sm:text-base leading-snug break-words">
+                          {team.teamName}
+                        </span>
+                        <span className="sm:hidden font-mono text-[11px] font-semibold text-[#ff7a1a] mt-0.5">
+                          {team.teamId}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 );
@@ -174,3 +183,4 @@ export default function LeaderboardPage() {
     </main>
   );
 }
+
