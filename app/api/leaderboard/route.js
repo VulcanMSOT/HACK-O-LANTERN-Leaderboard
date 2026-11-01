@@ -35,20 +35,12 @@ export async function GET() {
     const mode = settings.leaderboard_mode || 'live';
     const scope = settings.leaderboard_scope || 'all_teams';
 
-    const rounds = roundsRes.rows.map((r) => ({
-      round_number: r.round_number,
-      label: r.label,
-      max_marks: Number(r.max_marks) || 10,
-      status: r.status,
-    }));
-
     // 1. Hidden Mode
     if (mode === 'hidden') {
       return NextResponse.json(
         {
           mode: 'hidden',
           scope,
-          rounds,
           leaderboard: [],
           updatedAt: new Date().toISOString(),
         },
@@ -69,15 +61,13 @@ export async function GET() {
         frozenList = [];
       }
 
+      // Strictly whitelist fields without scores/markings
       const sanitizedFrozen = frozenList.map((item) => ({
         rank: item.rank,
         teamId: item.teamId,
         teamName: item.teamName,
         problemStatement: item.problemStatement || null,
         trackNumber: item.trackNumber || null,
-        score: item.score ?? item.cumulativeTotal ?? 0,
-        cumulativeTotal: item.cumulativeTotal ?? item.score ?? 0,
-        roundScores: item.roundScores || {},
         hasAnyMarks: true,
       }));
 
@@ -85,7 +75,6 @@ export async function GET() {
         {
           mode: 'frozen',
           scope,
-          rounds,
           leaderboard: sanitizedFrozen,
           updatedAt: new Date().toISOString(),
         },
@@ -103,16 +92,13 @@ export async function GET() {
       ? standings.filter((s) => s.status === 'finalist')
       : standings;
 
-    // Include rankings, marks, round breakdown and track details
+    // Strictly whitelist fields (rank, teamId, teamName, problemStatement) — NO marks or numerical scores
     const leaderboard = filtered.map((s) => ({
       rank: s.rank,
       teamId: s.teamId,
       teamName: s.teamName,
       problemStatement: s.problemStatement || null,
       trackNumber: s.trackNumber || null,
-      score: s.finalOverallScore !== null ? s.finalOverallScore : s.cumulativeTotal,
-      cumulativeTotal: s.cumulativeTotal,
-      roundScores: s.roundScores,
       hasAnyMarks: s.hasAnyMarks,
       status: s.status,
     }));
@@ -121,7 +107,6 @@ export async function GET() {
       {
         mode: 'live',
         scope,
-        rounds,
         leaderboard,
         updatedAt: new Date().toISOString(),
       },
@@ -137,4 +122,3 @@ export async function GET() {
     );
   }
 }
-
